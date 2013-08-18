@@ -51,6 +51,10 @@ void MainWindow::crearActions(){
     actionListarCampo->setShortcut(tr("Ctrl+L"));
     connect(actionListarCampo,SIGNAL(triggered()),this,SLOT(listarCampo()));
 
+    //Menu Registro
+    actionIntroducirRegistro=new QAction("Introducir Registro",this);
+    actionIntroducirRegistro->setShortcut(tr("Ctrl+I"));
+    connect(actionIntroducirRegistro,SIGNAL(triggered()),this,SLOT(introducirRegistro()));
 
 }
 
@@ -77,6 +81,7 @@ void MainWindow::agregar(){
 
     //Menu Registro
     mRegistro=menuBar()->addMenu("&Registro");
+    mRegistro->addAction(actionIntroducirRegistro);
 
     //Menu Indices
     mIndices=menuBar()->addMenu("&Indices");
@@ -133,24 +138,50 @@ void MainWindow::agregar(){
     //Dialogo Listar Campos
     dialoglistarCampo = new QDialog(this,Qt::Dialog);
     dialoglistarCampo->hide();
-    dialoglistarCampo->setMinimumSize(350,350);
+    dialoglistarCampo->setMinimumSize(700,350);
     dialoglistarCampo->setWindowTitle("Listar Campos");
     dialoglistarCampo->setModal(true);
     dialoglistarCampo->setWindowModality(Qt::WindowModal);
 
     aceptarlistarCampo=new QPushButton("Aceptar",dialoglistarCampo);
-    aceptarlistarCampo->move(300,300);
+    aceptarlistarCampo->move(500,320);
     connect(aceptarlistarCampo,SIGNAL(clicked()),this,SLOT(click_aceptarListarCampo()));
+
+    //Tabla Listar Campos
+    tableCampo= new QTableWidget(0,5,dialoglistarCampo);
+    QStringList titulo;
+    titulo << "Nombre" << "Tipo"<<"Longitud"<<"Decimal"<<"Llave";
+    tableCampo->setHorizontalHeaderLabels(titulo);
+    tableCampo->setMinimumSize(600,250);
+    tableCampo->move(50,50);
+
+    //Dialogo Introducir Registro
+    dialogIntroducirRegistro=new QDialog(this,Qt::Dialog);
+    dialogIntroducirRegistro->hide();
+    dialoglistarCampo->setMinimumSize(300,500);
+    dialogIntroducirRegistro->setWindowTitle("Introducir Registro");
+    dialogIntroducirRegistro->setModal(true);
+    dialogIntroducirRegistro->setWindowModality(Qt::WindowModal);
+
+    aceptarIntroducirRegistro=new QPushButton("Aceptar",dialogIntroducirRegistro);
+    aceptarIntroducirRegistro->move(50,300);
+    connect(aceptarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_aceptarIntroducirRegistro()));
+
+    cancelarIntroducirRegistro=new QPushButton("Cancelar",dialogIntroducirRegistro);
+    cancelarIntroducirRegistro->move(300,300);
+    connect(cancelarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_cancelarIntroducirRegistro()));
 
 }
 
+//funciones Menu Archivo
 void MainWindow::nuevoArchivo(){
     activardesactivarMenus(true);
     header= new Header();
     archivo = new TDARecordFile();
+    listaC.clear();
+    listaR.clear();
 
 }
-
 
 void MainWindow::abrirArchivo(){
     archivo = new TDARecordFile();
@@ -169,10 +200,13 @@ void MainWindow::abrirArchivo(){
 }
 
 void MainWindow::guardarArchivo(){
-    /*if(archivo->isOpen()){
+    if(archivo->isOpen()){
         cout<<"esta abierto"<<endl;
+        for (int i = 0; i < listaR.size(); ++i) {
+            archivo->addRecord(header->getCampos(),listaR.at(i));
+        }
     }
-    else*/{
+    else{
         string camposLista=header->guardarCampos();
         QString filename = QFileDialog::getSaveFileName(this,tr("Save Document"),QDir::currentPath(),"Lusilla (*.lsll)");
         string fn = filename.toStdString()+".lsll";
@@ -203,18 +237,18 @@ void MainWindow::crearCampo(){
     dialogcrearCampo->show();
 }
 
+
+//Funcines Menu Campo
 void MainWindow::modificarCampo(){
     header->getCampos();
 }
 
 void MainWindow::listarCampo(){
-    vector<Campo*> listaC=header->getCampos();
-    tableCampo= new QTableWidget(5,2,dialoglistarCampo);
-    QStringList titulo;
-    titulo << "Nombre" << "Dias";
-    tableCampo->setHorizontalHeaderLabels(titulo);
+    listaC=header->getCampos();
+    tableCampo->setRowCount(listaC.size());
+    const char* s="";
     for (int i = 0; i < listaC.size(); i++) {
-        const char* s= listaC.at(i)->getNombre().c_str();
+        s= listaC.at(i)->getNombre().c_str();
         itemTableCampo= new QTableWidgetItem(s);
         itemTableCampo->setText(s);
         tableCampo->setItem(i,0,itemTableCampo);
@@ -261,6 +295,26 @@ void MainWindow::click_aceptarListarCampo(){
     dialoglistarCampo->hide();
 }
 
+//Funciones Menu Registro
+void MainWindow::introducirRegistro(){
+    unregistro="";
+    cout<<"Estoy aqui"<<endl;
+    cout<<listaC.size()<<endl<<listaR.size()<<endl;
+    dialogIntroducirRegistro->show();
+}
+
+bool MainWindow::click_aceptarIntroducirRegistro(){
+    unregistro="el registro";
+    listaR.push_back(unregistro);
+    return true;
+}
+
+void MainWindow::click_cancelarIntroducirRegistro(){
+
+}
+
+
+//----------------------------
 void MainWindow::activardesactivarMenus(bool opcion){
     banderaAbierto=opcion;
     actionNuevoArchivo->setEnabled(!opcion);
@@ -271,5 +325,6 @@ void MainWindow::activardesactivarMenus(bool opcion){
     actionCrearCampo->setEnabled(opcion);
     actionModificarCampo->setEnabled(opcion);
     actionListarCampo->setEnabled(opcion);
+    actionIntroducirRegistro->setEnabled(opcion);
 
 }

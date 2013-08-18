@@ -49,6 +49,7 @@ class MainWindow : public QMainWindow
 
     //Menu Registro
     QMenu* mRegistro;
+    QAction* actionIntroducirRegistro;
 
     //Menu Indices
     QMenu* mIndices;
@@ -73,6 +74,11 @@ class MainWindow : public QMainWindow
     QTableWidgetItem* itemTableCampo;
     QPushButton* aceptarlistarCampo;
 
+    //Dialogo introducirRegistro
+    QDialog* dialogIntroducirRegistro;
+    QPushButton* aceptarIntroducirRegistro;
+    QPushButton* cancelarIntroducirRegistro;
+
 
     
 public:
@@ -94,6 +100,7 @@ public slots:
     void listarCampo();
 
     //Slots Menu Registro
+    void introducirRegistro();
 
     //Slots Menu Indices
 
@@ -106,6 +113,10 @@ public slots:
     //Slots QDialog Listar Campo
     void click_aceptarListarCampo();
 
+    //SlotsQDialgo Introducir Campo
+    bool click_aceptarIntroducirRegistro();
+    void click_cancelarIntroducirRegistro();
+
 
 private:
     void crearActions();
@@ -113,6 +124,9 @@ private:
     void activardesactivarMenus(bool);
     Header* header;
     TDARecordFile* archivo;
+    vector<Campo*> listaC;
+    vector <string> listaR;
+    string unregistro;
     bool banderaAbierto;
 
 };

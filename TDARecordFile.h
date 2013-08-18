@@ -4,6 +4,7 @@
 #include "Campo.h"
 #include "TDAFile.h"
 #include <string>
+#include <vector>
 
 
 
@@ -13,7 +14,7 @@ public:
 	TDARecordFile();
 	~TDARecordFile();
 
-	bool addRecord(Campo*, string*);
+    bool addRecord(vector <Campo*>,string);
 	string* searchRecord();
 	bool deleteRecord(int);
 	string* listRecord();
