@@ -1,14 +1,14 @@
-#ifndef HEADERFILE_H
-#define HEADERFILE_H
+#ifndef HEADER_H
+#define HEADER_H
 
 #include "TDAFile.h"
 #include "Campo.h"
 #include <sstream>
 
-class HeaderFile
+class Header
 {
 public:
-    HeaderFile();
+    Header();
     bool agregarCampo(Campo*);
     vector<Campo*> getCampos();
     string guardarCampos();
@@ -20,4 +20,4 @@ private:
     vector<int> AvailList;
 };
 
-#endif // HEADERFILE_H
+#endif // HEADER_H

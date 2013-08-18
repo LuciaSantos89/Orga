@@ -14,14 +14,18 @@
 #include <QStringList>
 #include <QLabel>
 #include <QFileDialog>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+
+/*#include <QListWidget>
+#include <QListWidgetItem>*/
 
 #include <iostream>
-#include <QVariant>
 #include <string>
 #include <sstream>
 
 #include "Campo.h"
-#include "HeaderFile.h"
+#include "Header.h"
 #include "TDARecordFile.h"
 
 class MainWindow : public QMainWindow
@@ -52,7 +56,7 @@ class MainWindow : public QMainWindow
     //Menu Utilidades
     QMenu* mUtilidades;
 
-    //Dialogo Campo
+    //Dialogo crear Campo
     QDialog* dialogcrearCampo;
     QPushButton* aceptarcrearCampo;
     QPushButton* cancelarcrearCampo;
@@ -62,6 +66,13 @@ class MainWindow : public QMainWindow
     QSpinBox* spinDecimal;
     QCheckBox* checkLlave;
     QLabel* labelCampo;
+
+    //Dialogo listar Campos
+    QDialog* dialoglistarCampo;
+    QTableWidget* tableCampo;
+    QTableWidgetItem* itemTableCampo;
+    QPushButton* aceptarlistarCampo;
+
 
     
 public:
@@ -88,17 +99,21 @@ public slots:
 
     //Slots Menu Utilidades
 
-    //Slots QDialog Campo
+    //Slots QDialog Crear Campo
     bool click_aceptarCrearCampo();
     void click_cancelarCampo();
-    bool click_aceptarModificarCampo();
+
+    //Slots QDialog Listar Campo
+    void click_aceptarListarCampo();
 
 
 private:
     void crearActions();
     void agregar();
-    HeaderFile* heFile;
+    void activardesactivarMenus(bool);
+    Header* header;
     TDARecordFile* archivo;
+    bool banderaAbierto;
 
 };
 #endif // MAINWINDOW_H

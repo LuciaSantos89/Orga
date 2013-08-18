@@ -16,12 +16,11 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     TDAFile.cpp \
     Campo.cpp \
-    HeaderFile.cpp \
-    TDARecordFile.cpp
+    TDARecordFile.cpp \
+    Header.cpp
 
 HEADERS  += mainwindow.h \
     TDARecordFile.h \
     TDAFile.h \
     Campo.h \
-    HeaderFile.h \
-    HeaderFile.h
+    Header.h

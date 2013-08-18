@@ -1,10 +1,10 @@
-#include "HeaderFile.h"
+#include "Header.h"
 
-HeaderFile::HeaderFile()
+Header::Header()
 {
 }
 
-bool HeaderFile::agregarCampo(Campo* ca){
+bool Header::agregarCampo(Campo* ca){
     C.push_back(ca);
     cout<<"tamano "<<C.size()<<endl<<ca<<endl;
     int tam=C.size();
@@ -15,11 +15,11 @@ bool HeaderFile::agregarCampo(Campo* ca){
     return true;
 }
 
-vector <Campo*> HeaderFile::getCampos(){
+vector <Campo*> Header::getCampos(){
     return C;
 }
 
-string HeaderFile::guardarCampos(){
+string Header::guardarCampos(){
     int camposNum=0;
     string camposLista="";
     camposNum=C.size();
@@ -48,7 +48,7 @@ string HeaderFile::guardarCampos(){
     return camposLista;
 }
 
-string HeaderFile::guardarAvailList(){
+string Header::guardarAvailList(){
     string avail="";
     int num=0;
     stringstream ss;

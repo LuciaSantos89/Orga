@@ -5,11 +5,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     crearActions();
     agregar();
+    activardesactivarMenus(false);
 }
 
 MainWindow::~MainWindow()
 {
-
 }
 
 void MainWindow::crearActions(){
@@ -84,14 +84,13 @@ void MainWindow::agregar(){
     //Menu Utilidades
     mUtilidades=menuBar()->addMenu("&Utilidades");
 
-    //Dialogo Campo
+    //Dialogo Crear Campo
     dialogcrearCampo=new QDialog(this,Qt::Dialog);
     dialogcrearCampo->hide();
     dialogcrearCampo->setMinimumSize(350,350);
     dialogcrearCampo->setWindowTitle("Crear Campo");
     dialogcrearCampo->setModal(true);
     dialogcrearCampo->setWindowModality(Qt::WindowModal);
-
 
     labelCampo=new QLabel("Nombre",dialogcrearCampo);
     labelCampo->move(20,50);
@@ -131,37 +130,64 @@ void MainWindow::agregar(){
     cancelarcrearCampo->move(300,300);
     connect(cancelarcrearCampo,SIGNAL(clicked()),this,SLOT(click_cancelarCampo()));
 
+    //Dialogo Listar Campos
+    dialoglistarCampo = new QDialog(this,Qt::Dialog);
+    dialoglistarCampo->hide();
+    dialoglistarCampo->setMinimumSize(350,350);
+    dialoglistarCampo->setWindowTitle("Listar Campos");
+    dialoglistarCampo->setModal(true);
+    dialoglistarCampo->setWindowModality(Qt::WindowModal);
+
+    aceptarlistarCampo=new QPushButton("Aceptar",dialoglistarCampo);
+    aceptarlistarCampo->move(300,300);
+    connect(aceptarlistarCampo,SIGNAL(clicked()),this,SLOT(click_aceptarListarCampo()));
+
 }
 
 void MainWindow::nuevoArchivo(){
-    std::cout<<"Holita"<<std::endl;
-    heFile= new HeaderFile();
+    activardesactivarMenus(true);
+    header= new Header();
     archivo = new TDARecordFile();
 
 }
 
 
 void MainWindow::abrirArchivo(){
+    archivo = new TDARecordFile();
+    QString filename = QFileDialog::getOpenFileName(this,tr("Open Document"),QDir::currentPath(),"Lusilla (*.lsll)");
+    if( !filename.isNull() )
+    {
+        string fn = filename.toStdString();
+        archivo->open(fn,ios_base::out|ios_base::in);
+        activardesactivarMenus(true);
+        QDir dir(QDir::current());
+        string relative=dir.relativeFilePath(filename).toStdString();
+        header= new Header();
+    }
+
 
 }
 
 void MainWindow::guardarArchivo(){
-    string camposLista=heFile->guardarCampos();
-    QString filename = QFileDialog::getSaveFileName(this,tr("Save Document"),QDir::currentPath(),"Lusilla (*.lsll)");
-    string fn = filename.toStdString();
-    if( !filename.isNull() )
-    {
-        archivo->open(fn,ios_base::out);
-
-        //guardarheader Campos
-        //archivo->seek(0);
-        int tamCampos=camposLista.size();
-        cout<<camposLista<<endl;
-        archivo->write(camposLista.c_str(),tamCampos);
-        //guadarheader AvailList
+    /*if(archivo->isOpen()){
+        cout<<"esta abierto"<<endl;
     }
-    archivo->flush();
-    archivo->close();
+    else*/{
+        string camposLista=header->guardarCampos();
+        QString filename = QFileDialog::getSaveFileName(this,tr("Save Document"),QDir::currentPath(),"Lusilla (*.lsll)");
+        string fn = filename.toStdString()+".lsll";
+        if( !filename.isNull() )
+        {
+            archivo->open(fn,ios_base::out);
+
+            //guardarheader
+            archivo->seek(ios_base::beg);
+            int tamCampos=camposLista.size();
+            cout<<camposLista<<endl;
+            archivo->write(camposLista.c_str(),tamCampos);
+        }
+        archivo->flush();
+    }
 }
 
 void MainWindow::imprimirArchivo(){
@@ -169,7 +195,8 @@ void MainWindow::imprimirArchivo(){
 }
 
 void MainWindow::cerrarArchivo(){
-
+    activardesactivarMenus(false);
+    archivo->close();
 }
 
 void MainWindow::crearCampo(){
@@ -177,11 +204,23 @@ void MainWindow::crearCampo(){
 }
 
 void MainWindow::modificarCampo(){
-
+    header->getCampos();
 }
 
 void MainWindow::listarCampo(){
-
+    vector<Campo*> listaC=header->getCampos();
+    tableCampo= new QTableWidget(5,2,dialoglistarCampo);
+    QStringList titulo;
+    titulo << "Nombre" << "Dias";
+    tableCampo->setHorizontalHeaderLabels(titulo);
+    for (int i = 0; i < listaC.size(); i++) {
+        const char* s= listaC.at(i)->getNombre().c_str();
+        itemTableCampo= new QTableWidgetItem(s);
+        itemTableCampo->setText(s);
+        tableCampo->setItem(i,0,itemTableCampo);
+    }
+    dialoglistarCampo->show();
+    tableCampo->show();
 }
 
 bool MainWindow::click_aceptarCrearCampo(){
@@ -201,7 +240,7 @@ bool MainWindow::click_aceptarCrearCampo(){
     if(resp1)
         cout<<"Se creo"<<endl;
     //c->agregarCampo();
-    bool resp2=heFile->agregarCampo(c);
+    bool resp2=header->agregarCampo(c);
     if(resp2)
         cout<<"Se agrego"<<endl;
 
@@ -218,7 +257,19 @@ void MainWindow::click_cancelarCampo(){
     dialogcrearCampo->hide();
 }
 
-bool MainWindow::click_aceptarModificarCampo(){
-    return true;
+void MainWindow::click_aceptarListarCampo(){
+    dialoglistarCampo->hide();
 }
 
+void MainWindow::activardesactivarMenus(bool opcion){
+    banderaAbierto=opcion;
+    actionNuevoArchivo->setEnabled(!opcion);
+    actionAbrirArchivo->setEnabled(!opcion);
+    actionGuardarArchivo->setEnabled(opcion);
+    actionCerrarArchivo->setEnabled(opcion);
+    actionImprimirArchivo->setEnabled(opcion);
+    actionCrearCampo->setEnabled(opcion);
+    actionModificarCampo->setEnabled(opcion);
+    actionListarCampo->setEnabled(opcion);
+
+}
