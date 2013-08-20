@@ -182,7 +182,6 @@ void MainWindow::nuevoArchivo(){
     activardesactivarMenus(true);
     header= new Header();
     archivo = new TDARecordFile();
-    archivo->open("tmp",ios_base::out);
     listaC.clear();
     listaR.clear();
 
@@ -216,9 +215,6 @@ void MainWindow::abrirArchivo(){
 void MainWindow::guardarArchivo(){
     if(archivo->isOpen()){
         cout<<"esta abierto"<<endl;
-        for (int i = 0; i < listaR.size(); ++i) {
-            archivo->addRecord(header->getCampos(),listaR.at(i));
-        }
     }
     else{
         string camposLista=header->guardarCampos();
@@ -261,11 +257,38 @@ void MainWindow::listarCampo(){
     listaC=header->getCampos();
     tableCampo->setRowCount(listaC.size());
     const char* s="";
+    stringstream tmp;
     for (int i = 0; i < listaC.size(); i++) {
         s= listaC.at(i)->getNombre().c_str();
         itemTableCampo= new QTableWidgetItem(s);
         itemTableCampo->setText(s);
         tableCampo->setItem(i,0,itemTableCampo);
+
+
+        tmp<<listaC.at(i)->getTipo();
+        s=tmp.str().c_str();
+        itemTableCampo= new QTableWidgetItem(s);
+        itemTableCampo->setText(s);
+        tableCampo->setItem(i,1,itemTableCampo);
+        tmp.str("");
+
+        tmp<<listaC.at(i)->getSize();
+        s=tmp.str().c_str();
+        cout<<s<<endl;
+        itemTableCampo= new QTableWidgetItem(s);
+        itemTableCampo->setText(s);
+        tableCampo->setItem(i,2,itemTableCampo);
+        tmp.str("");
+
+        /*s= listaC.at(i)->getSize_d().c_str();
+        itemTableCampo= new QTableWidgetItem(s);
+        itemTableCampo->setText(s);
+        tableCampo->setItem(i,3,itemTableCampo);
+
+        s= listaC.at(i)->getKey().c_str();
+        itemTableCampo= new QTableWidgetItem(s);
+        itemTableCampo->setText(s);
+        tableCampo->setItem(i,4,itemTableCampo);*/
     }
     dialoglistarCampo->show();
     tableCampo->show();
