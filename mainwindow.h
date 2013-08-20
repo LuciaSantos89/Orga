@@ -107,6 +107,7 @@ public slots:
     //Slots Menu Utilidades
 
     //Slots QDialog Crear Campo
+    void cambiarTipoCampo();
     bool click_aceptarCrearCampo();
     void click_cancelarCampo();
 

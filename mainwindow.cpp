@@ -110,6 +110,7 @@ void MainWindow::agregar(){
     QStringList tipos;
     tipos<<"Cadena"<<"Entero"<<"Real";
     comboTipoCampo->addItems(tipos);
+    connect(comboTipoCampo,SIGNAL(currentIndexChanged(int)),this,SLOT(cambiarTipoCampo()));
 
     labelCampo=new QLabel("Longitud",dialogcrearCampo);
     labelCampo->move(20,150);
@@ -134,6 +135,9 @@ void MainWindow::agregar(){
     cancelarcrearCampo=new QPushButton("Cancelar",dialogcrearCampo);
     cancelarcrearCampo->move(300,300);
     connect(cancelarcrearCampo,SIGNAL(clicked()),this,SLOT(click_cancelarCampo()));
+
+
+
 
     //Dialogo Listar Campos
     dialoglistarCampo = new QDialog(this,Qt::Dialog);
@@ -267,34 +271,51 @@ void MainWindow::listarCampo(){
     tableCampo->show();
 }
 
+void MainWindow::cambiarTipoCampo(){
+    int tmp=comboTipoCampo->currentIndex();
+    if(tmp==2){
+        spinDecimal->setEnabled(true);
+    }
+    else{
+        spinDecimal->setEnabled(false);
+    }
+}
+
 bool MainWindow::click_aceptarCrearCampo(){
     Campo* c = new Campo();
-    string nombre="";
-    nombre=lineNombreCampo->text().toStdString();
+    string nombre=""; 
     int tipo=0;
-    tipo=comboTipoCampo->currentIndex();
     int longitud=0;
-    longitud=spinLongitud->text().toInt();
     int decimal=0;
-    decimal=spinDecimal->text().toInt();
     bool llave = false;
-    llave=checkLlave->isChecked();
 
-    bool resp1=c->crearCampo(nombre,tipo,longitud,decimal,llave);
-    if(resp1)
-        cout<<"Se creo"<<endl;
-    //c->agregarCampo();
-    bool resp2=header->agregarCampo(c);
-    if(resp2)
-        cout<<"Se agrego"<<endl;
+        nombre=lineNombreCampo->text().toStdString();
+        tipo=comboTipoCampo->currentIndex();
+        longitud=spinLongitud->text().toInt();
+        decimal=spinDecimal->text().toInt();
+        llave=checkLlave->isChecked();
+        if(nombre.length()==0 || longitud==0){
+            cout<<"no"<<endl;
+        }
+        else{
+            bool resp1=c->crearCampo(nombre,tipo,longitud,decimal,llave);
+            if(resp1)
+                cout<<"Se creo"<<endl;
+            //c->agregarCampo();
+            bool resp2=header->agregarCampo(c);
+            if(resp2)
+                cout<<"Se agrego"<<endl;
 
 
-    stringstream ss;
-    ss << longitud;
-    cout<<nombre<<endl<<ss.str()<<endl<<llave<<endl;
+            stringstream ss;
+            ss << longitud;
+            cout<<nombre<<endl<<ss.str()<<endl<<llave<<endl;
 
-    dialogcrearCampo->hide();
-    return true;
+            dialogcrearCampo->hide();
+            return true;
+        }
+        return false;
+
 }
 
 void MainWindow::click_cancelarCampo(){
