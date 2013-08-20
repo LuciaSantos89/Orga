@@ -4,6 +4,8 @@
 #include "TDAFile.h"
 #include "Campo.h"
 #include <sstream>
+#include<string.h>
+#include <stdlib.h>
 
 class Header
 {
@@ -13,7 +15,7 @@ public:
     vector<Campo*> getCampos();
     string guardarCampos();
     string guardarAvailList();
-    void recuperarCampos();
+    void recuperarCampos(char*);
 
 private:
     vector<Campo*> C;

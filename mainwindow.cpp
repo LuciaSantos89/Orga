@@ -178,6 +178,7 @@ void MainWindow::nuevoArchivo(){
     activardesactivarMenus(true);
     header= new Header();
     archivo = new TDARecordFile();
+    archivo->open("tmp",ios_base::out);
     listaC.clear();
     listaR.clear();
 
@@ -193,7 +194,16 @@ void MainWindow::abrirArchivo(){
         activardesactivarMenus(true);
         QDir dir(QDir::current());
         string relative=dir.relativeFilePath(filename).toStdString();
+        cout<<"abierto"<<endl;
         header= new Header();
+        string tmp="";
+        char buff[1];
+        do{
+            archivo->read(buff,1);
+            tmp+=*buff;
+        }while(*buff!='\n');
+        cout<<tmp<<endl;
+        header->recuperarCampos(strdup(tmp.c_str()));
     }
 
 

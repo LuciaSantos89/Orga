@@ -44,7 +44,7 @@ string Header::guardarCampos(){
         }
     }
     cout<<camposLista<<endl;
-    camposLista+=guardarAvailList();
+    camposLista+=guardarAvailList()+"\n";
     return camposLista;
 }
 
@@ -64,3 +64,24 @@ string Header::guardarAvailList(){
     return avail;
 }
 
+void Header::recuperarCampos(char* tmp){
+    char* separado;
+    separado=strtok(tmp,",");
+    int numC=atoi((const char*)separado);
+
+   for (int i = 0; i< numC ; i++) {
+        separado=strtok(NULL,",");
+        cout<<separado<<endl;
+        separado=strtok(NULL,",");
+        cout<<separado<<endl;
+        separado=strtok(NULL,",");
+        cout<<separado<<endl;
+        separado=strtok(NULL,",");
+        cout<<separado<<endl;
+        separado=strtok(NULL,",");
+        cout<<separado<<endl;
+    }
+   separado=strtok(NULL,",");
+   int numAL=atoi((const char*)separado);
+   cout<<"avai "<<numAL<<endl;
+}
