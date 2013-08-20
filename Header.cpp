@@ -71,17 +71,20 @@ void Header::recuperarCampos(char* tmp){
 
    for (int i = 0; i< numC ; i++) {
         separado=strtok(NULL,",");
-        cout<<separado<<endl;
+        string nombre=separado;
         separado=strtok(NULL,",");
-        cout<<separado<<endl;
+        int tipo=atoi((const char*)separado);
         separado=strtok(NULL,",");
-        cout<<separado<<endl;
+        int longitud=atoi((const char*)separado);
         separado=strtok(NULL,",");
-        cout<<separado<<endl;
+        int decimal=atoi((const char*)separado);
         separado=strtok(NULL,",");
-        cout<<separado<<endl;
+        int llave=atoi((const char*)separado);
+        Campo* c = new Campo();
+        c->crearCampo(nombre,tipo,longitud,decimal,llave);
+        agregarCampo(c);
     }
    separado=strtok(NULL,",");
    int numAL=atoi((const char*)separado);
-   cout<<"avai "<<numAL<<endl;
+   AvailList.push_back(numAL);
 }
