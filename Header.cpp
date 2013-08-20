@@ -6,12 +6,7 @@ Header::Header()
 
 bool Header::agregarCampo(Campo* ca){
     C.push_back(ca);
-    cout<<"tamano "<<C.size()<<endl<<ca<<endl;
     int tam=C.size();
-    for (int var = 0; var < tam; var++) {
-        cout<<C.at(var)<<endl;
-    }
-    cout<<endl;
     return true;
 }
 
@@ -43,7 +38,6 @@ string Header::guardarCampos(){
             camposLista+=ss.str()+",";
         }
     }
-    cout<<camposLista<<endl;
     camposLista+=guardarAvailList()+"\n";
     return camposLista;
 }

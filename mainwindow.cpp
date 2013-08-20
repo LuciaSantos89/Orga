@@ -136,9 +136,6 @@ void MainWindow::agregar(){
     cancelarcrearCampo->move(300,300);
     connect(cancelarcrearCampo,SIGNAL(clicked()),this,SLOT(click_cancelarCampo()));
 
-
-
-
     //Dialogo Listar Campos
     dialoglistarCampo = new QDialog(this,Qt::Dialog);
     dialoglistarCampo->hide();
@@ -192,12 +189,14 @@ void MainWindow::abrirArchivo(){
     QString filename = QFileDialog::getOpenFileName(this,tr("Open Document"),QDir::currentPath(),"Lusilla (*.lsll)");
     if( !filename.isNull() )
     {
+        listaC.clear();
+        listaR.clear();
         string fn = filename.toStdString();
         archivo->open(fn,ios_base::out|ios_base::in);
         activardesactivarMenus(true);
         QDir dir(QDir::current());
         string relative=dir.relativeFilePath(filename).toStdString();
-        cout<<"abierto"<<endl;
+        cout<<"abierto: "<<relative<<endl;
         header= new Header();
         string tmp="";
         char buff[1];
@@ -205,7 +204,6 @@ void MainWindow::abrirArchivo(){
             archivo->read(buff,1);
             tmp+=*buff;
         }while(*buff!='\n');
-        cout<<tmp<<endl;
         header->recuperarCampos(strdup(tmp.c_str()));
     }
 
@@ -256,39 +254,41 @@ void MainWindow::modificarCampo(){
 void MainWindow::listarCampo(){
     listaC=header->getCampos();
     tableCampo->setRowCount(listaC.size());
-    const char* s="";
+    string s="";
     stringstream tmp;
     for (int i = 0; i < listaC.size(); i++) {
-        s= listaC.at(i)->getNombre().c_str();
-        itemTableCampo= new QTableWidgetItem(s);
-        itemTableCampo->setText(s);
+        s= listaC.at(i)->getNombre();
+        itemTableCampo= new QTableWidgetItem(0);
+        itemTableCampo->setText(s.c_str());
         tableCampo->setItem(i,0,itemTableCampo);
 
-
         tmp<<listaC.at(i)->getTipo();
-        s=tmp.str().c_str();
-        itemTableCampo= new QTableWidgetItem(s);
-        itemTableCampo->setText(s);
+        s=tmp.str();
+        itemTableCampo= new QTableWidgetItem(0);
+        itemTableCampo->setText(s.c_str());
         tableCampo->setItem(i,1,itemTableCampo);
         tmp.str("");
 
         tmp<<listaC.at(i)->getSize();
-        s=tmp.str().c_str();
-        cout<<s<<endl;
-        itemTableCampo= new QTableWidgetItem(s);
-        itemTableCampo->setText(s);
+        s=tmp.str();
+        itemTableCampo= new QTableWidgetItem(0);
+        itemTableCampo->setText(s.c_str());
         tableCampo->setItem(i,2,itemTableCampo);
         tmp.str("");
 
-        /*s= listaC.at(i)->getSize_d().c_str();
-        itemTableCampo= new QTableWidgetItem(s);
-        itemTableCampo->setText(s);
+        tmp<<listaC.at(i)->getSize_d();
+        s=tmp.str();
+        itemTableCampo= new QTableWidgetItem(0);
+        itemTableCampo->setText(s.c_str());
         tableCampo->setItem(i,3,itemTableCampo);
+        tmp.str("");
 
-        s= listaC.at(i)->getKey().c_str();
-        itemTableCampo= new QTableWidgetItem(s);
-        itemTableCampo->setText(s);
-        tableCampo->setItem(i,4,itemTableCampo);*/
+        tmp<<listaC.at(i)->getKey();
+        s=tmp.str();
+        itemTableCampo= new QTableWidgetItem(0);
+        itemTableCampo->setText(s.c_str());
+        tableCampo->setItem(i,4,itemTableCampo);
+        tmp.str("");
     }
     dialoglistarCampo->show();
     tableCampo->show();
@@ -329,10 +329,6 @@ bool MainWindow::click_aceptarCrearCampo(){
             if(resp2)
                 cout<<"Se agrego"<<endl;
 
-
-            stringstream ss;
-            ss << longitud;
-            cout<<nombre<<endl<<ss.str()<<endl<<llave<<endl;
 
             dialogcrearCampo->hide();
             return true;
