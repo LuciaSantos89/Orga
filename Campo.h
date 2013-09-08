@@ -27,15 +27,15 @@ public:
     bool crearCampo(string,int,int,int,bool); //crea un campo
     //obtiene o modifica cada atributo de un campo
 
-	bool setNombre();
+    bool setNombre(string);
     string getNombre();
-	bool setTipo();
+    bool setTipo(int);
 	int getTipo();
-	bool setSize();
+    bool setSize(int);
 	int getSize();
-	bool setSize_d();
+    bool setSize_d(int);
 	int getSize_d();
-	bool setKey();
+    bool setKey(bool);
 	bool getKey();
 
 

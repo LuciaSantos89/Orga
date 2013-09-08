@@ -4,6 +4,6 @@ TDARecordFile::TDARecordFile()
 {
 }
 
-bool TDARecordFile::addRecord(vector <Campo*>,string){
+bool TDARecordFile::addRecord(vector <Campo*>,vector <string>){
     return true;
 }

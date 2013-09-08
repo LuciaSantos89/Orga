@@ -159,17 +159,17 @@ void MainWindow::agregar(){
     //Dialogo Introducir Registro
     dialogIntroducirRegistro=new QDialog(this,Qt::Dialog);
     dialogIntroducirRegistro->hide();
-    dialoglistarCampo->setMinimumSize(300,500);
+    dialogIntroducirRegistro->setMinimumSize(300,500);
     dialogIntroducirRegistro->setWindowTitle("Introducir Registro");
     dialogIntroducirRegistro->setModal(true);
     dialogIntroducirRegistro->setWindowModality(Qt::WindowModal);
 
     aceptarIntroducirRegistro=new QPushButton("Aceptar",dialogIntroducirRegistro);
-    aceptarIntroducirRegistro->move(50,300);
+    aceptarIntroducirRegistro->move(50,400);
     connect(aceptarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_aceptarIntroducirRegistro()));
 
     cancelarIntroducirRegistro=new QPushButton("Cancelar",dialogIntroducirRegistro);
-    cancelarIntroducirRegistro->move(300,300);
+    cancelarIntroducirRegistro->move(300,400);
     connect(cancelarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_cancelarIntroducirRegistro()));
 
 }
@@ -181,6 +181,8 @@ void MainWindow::nuevoArchivo(){
     archivo = new TDARecordFile();
     listaC.clear();
     listaR.clear();
+    guardado=false;
+    regIntroducido=false;
 
 }
 
@@ -190,7 +192,7 @@ void MainWindow::abrirArchivo(){
     if( !filename.isNull() )
     {
         listaC.clear();
-        listaR.clear();
+        regIntroducido=false;
         string fn = filename.toStdString();
         archivo->open(fn,ios_base::out|ios_base::in);
         activardesactivarMenus(true);
@@ -205,6 +207,10 @@ void MainWindow::abrirArchivo(){
             tmp+=*buff;
         }while(*buff!='\n');
         header->recuperarCampos(strdup(tmp.c_str()));
+        listaC=header->getCampos();
+        if(listaC.size()!=0){
+            guardado=true;
+        }
     }
 
 
@@ -214,7 +220,7 @@ void MainWindow::guardarArchivo(){
     if(archivo->isOpen()){
         cout<<"esta abierto"<<endl;
     }
-    else{
+    if(regIntroducido==false){
         string camposLista=header->guardarCampos();
         QString filename = QFileDialog::getSaveFileName(this,tr("Save Document"),QDir::currentPath(),"Lusilla (*.lsll)");
         string fn = filename.toStdString()+".lsll";
@@ -229,6 +235,7 @@ void MainWindow::guardarArchivo(){
             archivo->write(camposLista.c_str(),tamCampos);
         }
         archivo->flush();
+        guardado=true;
     }
 }
 
@@ -241,14 +248,21 @@ void MainWindow::cerrarArchivo(){
     archivo->close();
 }
 
+//Funcines Menu Campo
 void MainWindow::crearCampo(){
-    dialogcrearCampo->show();
+    if(regIntroducido==true){
+        cout<<"Ya no puede crearcampos"<<endl;
+    }
+    else{
+        dialogcrearCampo->show();
+    }
 }
 
-
-//Funcines Menu Campo
 void MainWindow::modificarCampo(){
-    header->getCampos();
+    /*if(regIntroducido==true){
+        cout<<"Ya agrego registros"<<endl;
+    }
+    header->getCampos();*/
 }
 
 void MainWindow::listarCampo(){
@@ -256,7 +270,7 @@ void MainWindow::listarCampo(){
     tableCampo->setRowCount(listaC.size());
     string s="";
     stringstream tmp;
-    for (int i = 0; i < listaC.size(); i++) {
+    for (unsigned int i = 0; i < listaC.size(); i++) {
         s= listaC.at(i)->getNombre();
         itemTableCampo= new QTableWidgetItem(0);
         itemTableCampo->setText(s.c_str());
@@ -329,8 +343,14 @@ bool MainWindow::click_aceptarCrearCampo(){
             if(resp2)
                 cout<<"Se agrego"<<endl;
 
-
-            dialogcrearCampo->hide();
+            {
+                lineNombreCampo->setText("");
+                comboTipoCampo->setCurrentIndex(0);
+                spinLongitud->setValue(0);
+                spinDecimal->setValue(0);
+                checkLlave->setChecked(false);
+            }
+            //dialogcrearCampo->hide();
             return true;
         }
         return false;
@@ -347,26 +367,31 @@ void MainWindow::click_aceptarListarCampo(){
 
 //Funciones Menu Registro
 void MainWindow::introducirRegistro(){
-    unregistro="";
-    cout<<"Estoy aqui"<<endl;
-    cout<<listaC.size()<<endl<<listaR.size()<<endl;
-    dialogIntroducirRegistro->show();
+    listaC=header->getCampos();
+    if(listaC.size()==0){
+        cout<<"Primero tiene que agregar Campos"<<endl;
+    }
+    else{
+        if(guardado==false){
+            guardarArchivo();
+        }
+        crearDialogoIntroducirRegistro();
+        dialogIntroducirRegistro->show();
+    }
 }
 
 bool MainWindow::click_aceptarIntroducirRegistro(){
-    unregistro="el registro";
-    listaR.push_back(unregistro);
+    //regIntroducido=true;
     return true;
 }
 
 void MainWindow::click_cancelarIntroducirRegistro(){
-
+    dialogIntroducirRegistro->hide();
 }
 
 
 //----------------------------
 void MainWindow::activardesactivarMenus(bool opcion){
-    banderaAbierto=opcion;
     actionNuevoArchivo->setEnabled(!opcion);
     actionAbrirArchivo->setEnabled(!opcion);
     actionGuardarArchivo->setEnabled(opcion);
@@ -377,4 +402,18 @@ void MainWindow::activardesactivarMenus(bool opcion){
     actionListarCampo->setEnabled(opcion);
     actionIntroducirRegistro->setEnabled(opcion);
 
+}
+
+void MainWindow::crearDialogoIntroducirRegistro(){
+    QTableWidget* tablaRegistro = new QTableWidget(dialogIntroducirRegistro);
+    tablaRegistro->setColumnCount(listaC.size());
+    QStringList headersCampo;
+    for (unsigned int i = 0; i < listaC.size(); ++i) {
+        headersCampo <<listaC.at(i)->getNombre().c_str();
+    }
+    tablaRegistro->setHorizontalHeaderLabels(headersCampo);
+
+    int rows = tablaRegistro->rowCount();
+    cout<<rows<<endl;
+    tablaRegistro->insertRow(rows);
 }

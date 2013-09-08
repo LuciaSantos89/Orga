@@ -76,6 +76,8 @@ class MainWindow : public QMainWindow
 
     //Dialogo introducirRegistro
     QDialog* dialogIntroducirRegistro;
+    QTableWidget* tableRegistro;
+    QTableWidgetItem* itemTableRegistro;
     QPushButton* aceptarIntroducirRegistro;
     QPushButton* cancelarIntroducirRegistro;
 
@@ -123,12 +125,15 @@ private:
     void crearActions();
     void agregar();
     void activardesactivarMenus(bool);
+    void crearDialogoIntroducirRegistro();
+    void agregartmp(string);
     Header* header;
     TDARecordFile* archivo;
     vector<Campo*> listaC;
-    vector <string> listaR;
+    vector <char*> listaR;
     string unregistro;
-    bool banderaAbierto;
+    bool guardado;
+    bool regIntroducido;
 
 };
 #endif // MAINWINDOW_H

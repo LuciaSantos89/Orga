@@ -14,7 +14,7 @@ public:
 	TDARecordFile();
 	~TDARecordFile();
 
-    bool addRecord(vector <Campo*>,string);
+    bool addRecord(vector <Campo*>,vector<string>);
 	string* searchRecord();
 	bool deleteRecord(int);
 	string* listRecord();

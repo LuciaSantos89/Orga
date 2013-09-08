@@ -15,7 +15,7 @@ public:
     vector<Campo*> getCampos();
     string guardarCampos();
     string guardarAvailList();
-    void recuperarCampos(char*);
+    bool recuperarCampos(char*);
 
 private:
     vector<Campo*> C;

@@ -34,3 +34,27 @@ bool Campo::getKey(){
 	return this->key;
 }
 
+bool Campo::setNombre(string nombre){
+    this->nombre=nombre;
+    return true;
+}
+
+bool Campo::setTipo(int tipo){
+    this->tipo=tipo;
+    return true;
+}
+
+bool Campo::setSize(int size){
+    this->size=size;
+    return true;
+}
+
+bool Campo::setSize_d(int size_d){
+    this->size_dec=size_d;
+    return true;
+}
+
+bool Campo::setKey(bool key){
+    this->key=key;
+    return true;
+}

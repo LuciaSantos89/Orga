@@ -6,7 +6,6 @@ Header::Header()
 
 bool Header::agregarCampo(Campo* ca){
     C.push_back(ca);
-    int tam=C.size();
     return true;
 }
 
@@ -58,7 +57,7 @@ string Header::guardarAvailList(){
     return avail;
 }
 
-void Header::recuperarCampos(char* tmp){
+bool Header::recuperarCampos(char* tmp){
     char* separado;
     separado=strtok(tmp,",");
     int numC=atoi((const char*)separado);
@@ -81,4 +80,5 @@ void Header::recuperarCampos(char* tmp){
    separado=strtok(NULL,",");
    int numAL=atoi((const char*)separado);
    AvailList.push_back(numAL);
+   return true;
 }
