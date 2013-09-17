@@ -4,12 +4,12 @@ Campo::Campo(){
 
 }
 
-bool Campo::crearCampo(string n, int t, int s, int s_dec, bool k){
-	this->nombre=n;
-	this->tipo=t;
-	this->size=s;
-	this->size_dec=s_dec;
-	this->key=k;
+bool Campo::crearCampo(string nombre, int tipo, int longitud, int decimal, bool llave){
+    this->nombre=nombre;
+    this->tipo=tipo;
+    this->longitud=longitud;
+    this->decimal=decimal;
+    this->llave=llave;
     return true;
 }
 
@@ -22,16 +22,16 @@ int Campo::getTipo(){
 	return this->tipo;
 }
 
-int Campo::getSize(){
-	return this->size;
+int Campo::getLongitud(){
+    return this->longitud;
 }
 
-int Campo::getSize_d(){
-	return this->size_dec;
+int Campo::getDecimal(){
+    return this->decimal;
 }
 
-bool Campo::getKey(){
-	return this->key;
+bool Campo::getLlave(){
+    return this->llave;
 }
 
 bool Campo::setNombre(string nombre){
@@ -44,17 +44,17 @@ bool Campo::setTipo(int tipo){
     return true;
 }
 
-bool Campo::setSize(int size){
-    this->size=size;
+bool Campo::setLongitud(int longitud){
+    this->longitud=longitud;
     return true;
 }
 
-bool Campo::setSize_d(int size_d){
-    this->size_dec=size_d;
+bool Campo::setDecimal(int decimal){
+    this->decimal=decimal;
     return true;
 }
 
-bool Campo::setKey(bool key){
-    this->key=key;
+bool Campo::setLlave(bool llave){
+    this->llave=llave;
     return true;
 }

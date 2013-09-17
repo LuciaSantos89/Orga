@@ -36,7 +36,7 @@ void MainWindow::crearActions(){
 
     actionSalirArchivo= new QAction("&Salir",this);
     actionSalirArchivo->setShortcut(tr("Ctrl+X"));
-    connect(actionSalirArchivo,SIGNAL(triggered()),this,SLOT(close()));
+    connect(actionSalirArchivo,SIGNAL(triggered()),this,SLOT(salir()));
 
     //Menu Campo
     actionCrearCampo= new QAction("&Crear Campo",this);
@@ -53,8 +53,39 @@ void MainWindow::crearActions(){
 
     //Menu Registro
     actionIntroducirRegistro=new QAction("Introducir Registro",this);
-    actionIntroducirRegistro->setShortcut(tr("Ctrl+I"));
     connect(actionIntroducirRegistro,SIGNAL(triggered()),this,SLOT(introducirRegistro()));
+
+    actionBuscarRegistro=new QAction("Buscar Registro",this);
+    connect(actionBuscarRegistro,SIGNAL(triggered()),this,SLOT(buscarRegistro()));
+
+    actionBorrarRegistro=new QAction("Borrar Registro",this);
+    connect(actionBorrarRegistro,SIGNAL(triggered()),this,SLOT(borrarRegistro()));
+
+    actionListarRegistro=new QAction("Listar Registro",this);
+    connect(actionListarRegistro,SIGNAL(triggered()),this,SLOT(listarRegistro()));
+
+    //Menu Indices
+    actionCrearIndiceSimple=new QAction("Crear Indice Simple",this);
+    connect(actionCrearIndiceSimple,SIGNAL(triggered()),this,SLOT(crearIndiceSimple()));
+
+    actionCrearArbolB=new QAction("Crear Arbol B",this);
+    connect(actionCrearArbolB,SIGNAL(triggered()),this,SLOT(crearArbolB()));
+
+    actionReindexar=new QAction("Reindexar",this);
+    connect(actionReindexar,SIGNAL(triggered()),this,SLOT(reindexar()));
+
+    //Menu Utilidades
+    actionImportarXML=new QAction("Impotar XML",this);
+    connect(actionImportarXML,SIGNAL(triggered()),this,SLOT(importarXML()));
+
+    actionExportarXML=new QAction("Exportar XML",this);
+    connect(actionExportarXML,SIGNAL(triggered()),this,SLOT(exportarXML()));
+
+    actionImportarJSON=new QAction("Impotar JSON",this);
+    connect(actionImportarJSON,SIGNAL(triggered()),this,SLOT(importarJSON()));
+
+    actionExportarJSON=new QAction("Exportar JSON",this);
+    connect(actionExportarJSON,SIGNAL(triggered()),this,SLOT(exportarJSON()));
 
 }
 
@@ -82,12 +113,22 @@ void MainWindow::agregar(){
     //Menu Registro
     mRegistro=menuBar()->addMenu("&Registro");
     mRegistro->addAction(actionIntroducirRegistro);
+    mRegistro->addAction(actionBorrarRegistro);
+    mRegistro->addAction(actionBuscarRegistro);
+    mRegistro->addAction(actionListarRegistro);
 
     //Menu Indices
     mIndices=menuBar()->addMenu("&Indices");
+    mIndices->addAction(actionCrearIndiceSimple);
+    mIndices->addAction(actionCrearArbolB);
+    mIndices->addAction(actionReindexar);
 
     //Menu Utilidades
     mUtilidades=menuBar()->addMenu("&Utilidades");
+    mUtilidades->addAction(actionImportarXML);
+    mUtilidades->addAction(actionExportarXML);
+    mUtilidades->addAction(actionImportarJSON);
+    mUtilidades->addAction(actionExportarJSON);
 
     //Dialogo Crear Campo
     dialogcrearCampo=new QDialog(this,Qt::Dialog);
@@ -116,6 +157,7 @@ void MainWindow::agregar(){
     labelCampo->move(20,150);
     spinLongitud=new QSpinBox(dialogcrearCampo);
     spinLongitud->move(100,150);
+    spinLongitud->setValue(1);
 
     labelCampo=new QLabel("Decimal",dialogcrearCampo);
     labelCampo->move(20,200);
@@ -139,13 +181,13 @@ void MainWindow::agregar(){
     //Dialogo Listar Campos
     dialoglistarCampo = new QDialog(this,Qt::Dialog);
     dialoglistarCampo->hide();
-    dialoglistarCampo->setMinimumSize(700,350);
+    dialoglistarCampo->setMinimumSize(550,350);
     dialoglistarCampo->setWindowTitle("Listar Campos");
     dialoglistarCampo->setModal(true);
     dialoglistarCampo->setWindowModality(Qt::WindowModal);
 
     aceptarlistarCampo=new QPushButton("Aceptar",dialoglistarCampo);
-    aceptarlistarCampo->move(500,320);
+    aceptarlistarCampo->move(450,320);
     connect(aceptarlistarCampo,SIGNAL(clicked()),this,SLOT(click_aceptarListarCampo()));
 
     //Tabla Listar Campos
@@ -153,13 +195,14 @@ void MainWindow::agregar(){
     QStringList titulo;
     titulo << "Nombre" << "Tipo"<<"Longitud"<<"Decimal"<<"Llave";
     tableCampo->setHorizontalHeaderLabels(titulo);
-    tableCampo->setMinimumSize(600,250);
+    tableCampo->setMinimumSize(550,250);
     tableCampo->move(50,50);
+    tableCampo->setColumnWidth(0,130);
 
     //Dialogo Introducir Registro
     dialogIntroducirRegistro=new QDialog(this,Qt::Dialog);
     dialogIntroducirRegistro->hide();
-    dialogIntroducirRegistro->setMinimumSize(300,500);
+    dialogIntroducirRegistro->setMinimumSize(500,500);
     dialogIntroducirRegistro->setWindowTitle("Introducir Registro");
     dialogIntroducirRegistro->setModal(true);
     dialogIntroducirRegistro->setWindowModality(Qt::WindowModal);
@@ -177,135 +220,168 @@ void MainWindow::agregar(){
 //funciones Menu Archivo
 void MainWindow::nuevoArchivo(){
     activardesactivarMenus(true);
-    header= new Header();
-    archivo = new TDARecordFile();
-    listaC.clear();
-    listaR.clear();
-    guardado=false;
+    archivo=new TDARecordFile();
+    header=new Header();
+    indices= new Index();
+    campos.clear();
     regIntroducido=false;
-
 }
 
 void MainWindow::abrirArchivo(){
-    archivo = new TDARecordFile();
-    QString filename = QFileDialog::getOpenFileName(this,tr("Open Document"),QDir::currentPath(),"Lusilla (*.lsll)");
-    if( !filename.isNull() )
-    {
-        listaC.clear();
-        regIntroducido=false;
-        string fn = filename.toStdString();
-        archivo->open(fn,ios_base::out|ios_base::in);
+    QString nombreArchivo = QFileDialog::getOpenFileName(this,tr("Abrir Documento"),QDir::currentPath(),"Lusilla (*.lsll)");
+    if( !nombreArchivo.isNull() ){
         activardesactivarMenus(true);
-        QDir dir(QDir::current());
-        string relative=dir.relativeFilePath(filename).toStdString();
-        cout<<"abierto: "<<relative<<endl;
-        header= new Header();
-        string tmp="";
-        char buff[1];
-        do{
-            archivo->read(buff,1);
-            tmp+=*buff;
-        }while(*buff!='\n');
-        header->recuperarCampos(strdup(tmp.c_str()));
-        listaC=header->getCampos();
-        if(listaC.size()!=0){
-            guardado=true;
-        }
+        archivo=new TDARecordFile();
+        header=new Header();
+        indices= new Index();
+        campos.clear();
+        string fn = nombreArchivo.toStdString();
+        archivo->open(fn,ios_base::out | ios_base::in);
+        header->recuperarHeader(archivo);
+        campos=header->getCampos();
+        //indices->abrir(fn);
     }
-
-
 }
 
 void MainWindow::guardarArchivo(){
-    if(archivo->isOpen()){
-        cout<<"esta abierto"<<endl;
-    }
-    if(regIntroducido==false){
-        string camposLista=header->guardarCampos();
-        QString filename = QFileDialog::getSaveFileName(this,tr("Save Document"),QDir::currentPath(),"Lusilla (*.lsll)");
-        string fn = filename.toStdString()+".lsll";
-        if( !filename.isNull() )
-        {
+    if(!regIntroducido){
+        QString nombreArchivo = QFileDialog::getSaveFileName(this,tr("Guardar Documento"),QDir::currentPath(),"Lusilla (*.lsll)");
+        if(!nombreArchivo.isNull()){
+            string fn = nombreArchivo.toStdString()+".lsll";
             archivo->open(fn,ios_base::out);
-
-            //guardarheader
-            archivo->seek(ios_base::beg);
-            int tamCampos=camposLista.size();
-            cout<<camposLista<<endl;
-            archivo->write(camposLista.c_str(),tamCampos);
+            header->crearHeader(campos);
+            header->guardarHeader(archivo);
         }
-        archivo->flush();
-        guardado=true;
     }
 }
 
 void MainWindow::imprimirArchivo(){
-
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::cerrarArchivo(){
+    if(archivo->isOpen()){
+        //indices->guardar();
+        archivo->flush();
+        archivo->close();
+    }
     activardesactivarMenus(false);
-    archivo->close();
+}
+
+void MainWindow::salir(){
+    this->cerrarArchivo();
+    this->close();
 }
 
 //Funcines Menu Campo
 void MainWindow::crearCampo(){
-    if(regIntroducido==true){
-        cout<<"Ya no puede crearcampos"<<endl;
+    if(regIntroducido){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("Ya no puede crear campos");
+        return;
     }
-    else{
-        dialogcrearCampo->show();
-    }
+    dialogcrearCampo->show();
 }
 
 void MainWindow::modificarCampo(){
-    /*if(regIntroducido==true){
-        cout<<"Ya agrego registros"<<endl;
+    if(regIntroducido || campos.size()==0){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("No puede modificar los campos");
     }
-    header->getCampos();*/
+    else{
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("Oh-no! Lucia no hizo esta parte");
+    }
 }
 
 void MainWindow::listarCampo(){
-    listaC=header->getCampos();
-    tableCampo->setRowCount(listaC.size());
-    string s="";
-    stringstream tmp;
-    for (unsigned int i = 0; i < listaC.size(); i++) {
-        s= listaC.at(i)->getNombre();
-        itemTableCampo= new QTableWidgetItem(0);
-        itemTableCampo->setText(s.c_str());
-        tableCampo->setItem(i,0,itemTableCampo);
+    if(campos.size()==0)
+        return;
+        tableCampo->setRowCount(campos.size());
+        string s="";
+        stringstream tmp;
+        for (unsigned int i = 0; i < campos.size(); i++) {
+            s= campos.at(i)->getNombre();
+            itemTableCampo= new QTableWidgetItem(0);
+            itemTableCampo->setText(s.c_str());
+            tableCampo->setItem(i,0,itemTableCampo);
 
-        tmp<<listaC.at(i)->getTipo();
-        s=tmp.str();
-        itemTableCampo= new QTableWidgetItem(0);
-        itemTableCampo->setText(s.c_str());
-        tableCampo->setItem(i,1,itemTableCampo);
-        tmp.str("");
+            int tipo=campos.at(i)->getTipo();
+            if(tipo==0)
+                tmp<<"Cadena";
+            if(tipo==1)
+                tmp<<"Entero";
+            if(tipo==2)
+                tmp<<"Real";
+            s=tmp.str();
+            itemTableCampo= new QTableWidgetItem(0);
+            itemTableCampo->setText(s.c_str());
+            tableCampo->setItem(i,1,itemTableCampo);
+            tmp.str("");
 
-        tmp<<listaC.at(i)->getSize();
-        s=tmp.str();
-        itemTableCampo= new QTableWidgetItem(0);
-        itemTableCampo->setText(s.c_str());
-        tableCampo->setItem(i,2,itemTableCampo);
-        tmp.str("");
+            tmp<<campos.at(i)->getLongitud();
+            s=tmp.str();
+            itemTableCampo= new QTableWidgetItem(0);
+            itemTableCampo->setText(s.c_str());
+            tableCampo->setItem(i,2,itemTableCampo);
+            tmp.str("");
 
-        tmp<<listaC.at(i)->getSize_d();
-        s=tmp.str();
-        itemTableCampo= new QTableWidgetItem(0);
-        itemTableCampo->setText(s.c_str());
-        tableCampo->setItem(i,3,itemTableCampo);
-        tmp.str("");
+            tmp<<campos.at(i)->getDecimal();
+            s=tmp.str();
+            itemTableCampo= new QTableWidgetItem(0);
+            itemTableCampo->setText(s.c_str());
+            tableCampo->setItem(i,3,itemTableCampo);
+            tmp.str("");
 
-        tmp<<listaC.at(i)->getKey();
-        s=tmp.str();
-        itemTableCampo= new QTableWidgetItem(0);
-        itemTableCampo->setText(s.c_str());
-        tableCampo->setItem(i,4,itemTableCampo);
-        tmp.str("");
+            int llave=campos.at(i)->getLlave();
+            if(llave==1)
+                tmp<<"Si";
+            else
+                tmp<<"No";
+            s=tmp.str();
+            itemTableCampo= new QTableWidgetItem(0);
+            itemTableCampo->setText(s.c_str());
+            tableCampo->setItem(i,4,itemTableCampo);
+            tmp.str("");
+        }
+        dialoglistarCampo->show();
+        tableCampo->show();
+}
+
+void MainWindow::click_aceptarCrearCampo(){
+    Campo* c = new Campo();
+    string nombre="";
+    int tipo=0;
+    int longitud=0;
+    int decimal=0;
+    bool llave = false;
+    nombre=lineNombreCampo->text().toStdString();
+    tipo=comboTipoCampo->currentIndex();
+    longitud=spinLongitud->text().toInt();
+    decimal=spinDecimal->text().toInt();
+    llave=checkLlave->isChecked();
+    if(nombre.length ()==0 ||longitud<=decimal){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("Hubo un error al querer crear el campo");
     }
-    dialoglistarCampo->show();
-    tableCampo->show();
+    else{
+        c->crearCampo(nombre,tipo,longitud,decimal,llave);
+        campos.push_back(c);
+        lineNombreCampo->setText("");
+        comboTipoCampo->setCurrentIndex(0);
+        spinLongitud->setValue(1);
+        spinDecimal->setValue(0);
+        checkLlave->setChecked(false);
+    }
+}
+
+void MainWindow::click_cancelarCampo(){
+    dialogcrearCampo->close();
+}
+
+void MainWindow::click_aceptarListarCampo(){
+    dialoglistarCampo->close();
 }
 
 void MainWindow::cambiarTipoCampo(){
@@ -318,75 +394,111 @@ void MainWindow::cambiarTipoCampo(){
     }
 }
 
-bool MainWindow::click_aceptarCrearCampo(){
-    Campo* c = new Campo();
-    string nombre=""; 
-    int tipo=0;
-    int longitud=0;
-    int decimal=0;
-    bool llave = false;
-
-        nombre=lineNombreCampo->text().toStdString();
-        tipo=comboTipoCampo->currentIndex();
-        longitud=spinLongitud->text().toInt();
-        decimal=spinDecimal->text().toInt();
-        llave=checkLlave->isChecked();
-        if(nombre.length()==0 || longitud==0){
-            cout<<"no"<<endl;
-        }
-        else{
-            bool resp1=c->crearCampo(nombre,tipo,longitud,decimal,llave);
-            if(resp1)
-                cout<<"Se creo"<<endl;
-            //c->agregarCampo();
-            bool resp2=header->agregarCampo(c);
-            if(resp2)
-                cout<<"Se agrego"<<endl;
-
-            {
-                lineNombreCampo->setText("");
-                comboTipoCampo->setCurrentIndex(0);
-                spinLongitud->setValue(0);
-                spinDecimal->setValue(0);
-                checkLlave->setChecked(false);
-            }
-            //dialogcrearCampo->hide();
-            return true;
-        }
-        return false;
-
-}
-
-void MainWindow::click_cancelarCampo(){
-    dialogcrearCampo->hide();
-}
-
-void MainWindow::click_aceptarListarCampo(){
-    dialoglistarCampo->hide();
-}
-
 //Funciones Menu Registro
 void MainWindow::introducirRegistro(){
-    listaC=header->getCampos();
-    if(listaC.size()==0){
-        cout<<"Primero tiene que agregar Campos"<<endl;
+    if(campos.size()==0 || !archivo->isOpen()){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("Primero Introduzca Campos y Guarde el archivo");
     }
     else{
-        if(guardado==false){
-            guardarArchivo();
+        registro.clear();
+        stringstream tmp;
+        for (unsigned int i = 0; i < campos.size(); i++) {
+            int tipo = campos.at(i)->getTipo();
+            if(tipo==0){
+                QString cadena=QInputDialog::getText(this,QString(campos.at(i)->getNombre().c_str()),QString(campos.at(i)->getNombre().c_str()),QLineEdit::Normal,"");
+                registro.push_back(cadena.toStdString());
+            }
+            if(tipo==1){
+                int entero=QInputDialog::getInt(this,QString(campos.at(i)->getNombre().c_str()),QString(campos.at(i)->getNombre().c_str()));
+                tmp<<entero;
+                registro.push_back(tmp.str());
+                tmp.str("");
+            }
+            if(tipo==2){
+                double max=pow(10,campos.at(i)->getLongitud()-campos.at(i)->getDecimal());
+                double real=QInputDialog::getDouble(this,QString(campos.at(i)->getNombre().c_str()),QString(campos.at(i)->getNombre().c_str()),0,-10000,max,campos.at(i)->getDecimal());
+                tmp<<real;
+                registro.push_back(tmp.str());
+                tmp.str("");
+            }
         }
-        crearDialogoIntroducirRegistro();
-        dialogIntroducirRegistro->show();
+        Registro* r= new Registro();
+        r->crearRegistro(registro,campos);
+        //if(!indices->verificarIndice()){
+            archivo->addRecord(r,indices);
+        /*}
+        else{
+            errorM=new QErrorMessage(this);
+            errorM->showMessage("El registro con esa llave ya existe");
+        }*/
     }
 }
 
-bool MainWindow::click_aceptarIntroducirRegistro(){
-    //regIntroducido=true;
-    return true;
+void MainWindow::click_aceptarIntroducirRegistro(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
 }
 
 void MainWindow::click_cancelarIntroducirRegistro(){
-    dialogIntroducirRegistro->hide();
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::crearDialogoIntroducirRegistro(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::buscarRegistro(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::borrarRegistro(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::listarRegistro(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+//Funciones Menu Indices
+void MainWindow::crearIndiceSimple(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::crearArbolB(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::reindexar(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::importarXML(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::exportarXML(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::importarJSON(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+}
+
+void MainWindow::exportarJSON(){
+    errorM=new QErrorMessage(this);
+    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
 }
 
 
@@ -401,19 +513,17 @@ void MainWindow::activardesactivarMenus(bool opcion){
     actionModificarCampo->setEnabled(opcion);
     actionListarCampo->setEnabled(opcion);
     actionIntroducirRegistro->setEnabled(opcion);
+    actionBuscarRegistro->setEnabled(opcion);
+    actionBorrarRegistro->setEnabled(opcion);
+    actionListarRegistro->setEnabled(opcion);
+    actionCrearIndiceSimple->setEnabled(opcion);
+    actionCrearArbolB->setEnabled(opcion);
+    actionReindexar->setEnabled(opcion);
+    actionImportarXML->setEnabled(opcion);
+    actionExportarXML->setEnabled(opcion);
+    actionImportarJSON->setEnabled(opcion);
+    actionExportarJSON->setEnabled(opcion);
 
 }
 
-void MainWindow::crearDialogoIntroducirRegistro(){
-    QTableWidget* tablaRegistro = new QTableWidget(dialogIntroducirRegistro);
-    tablaRegistro->setColumnCount(listaC.size());
-    QStringList headersCampo;
-    for (unsigned int i = 0; i < listaC.size(); ++i) {
-        headersCampo <<listaC.at(i)->getNombre().c_str();
-    }
-    tablaRegistro->setHorizontalHeaderLabels(headersCampo);
 
-    int rows = tablaRegistro->rowCount();
-    cout<<rows<<endl;
-    tablaRegistro->insertRow(rows);
-}

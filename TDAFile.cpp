@@ -6,6 +6,9 @@ TDAFile::TDAFile(){
 void TDAFile::Init(){
 }
 
+TDAFile::~TDAFile(){
+}
+
 bool TDAFile::open(string fn, ios_base::openmode mode){
 	this->file.open(fn.c_str(),mode);
 	if(this->file.is_open()){
@@ -42,6 +45,20 @@ bool TDAFile::seek(int p){
 	this->file.seekg(p);
 	this->file.seekp(p);
 	return true;
+}
+
+bool TDAFile::seek(int p,ios_base::seekdir dir){
+    if(!this->file.is_open()){
+        return false;
+    }
+    this->file.seekg(0, ios_base::end);
+    int a = file.tellg();
+    if(p>a){
+        return false;
+    }
+    this->file.seekg(p,dir);
+    this->file.seekp(p,dir);
+    return true;
 }
 
 int TDAFile::tell(){

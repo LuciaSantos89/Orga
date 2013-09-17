@@ -3,6 +3,7 @@
 
 #include "TDAFile.h"
 #include "Campo.h"
+#include <vector>
 #include <sstream>
 #include<string.h>
 #include <stdlib.h>
@@ -11,15 +12,15 @@ class Header
 {
 public:
     Header();
-    bool agregarCampo(Campo*);
+    void crearHeader(vector<Campo*>);
+    void guardarHeader(TDAFile*);
+    void recuperarHeader(TDAFile*);
+    void setCampos(vector<Campo*>);
     vector<Campo*> getCampos();
-    string guardarCampos();
-    string guardarAvailList();
-    bool recuperarCampos(char*);
 
 private:
-    vector<Campo*> C;
-    vector<int> AvailList;
+    vector<Campo*> campos;
+    string header;
 };
 
 #endif // HEADER_H

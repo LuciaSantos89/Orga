@@ -19,6 +19,7 @@ public:
     int read(char*,int);//logical variable to read
     int write(const char*,int);//logical variable to write
     bool seek(int);//move the pointer to other site
+    bool seek(int,ios_base::seekdir);//move the pointer to other site
     int tell();
     bool flush();//empty the buffers
     bool close();//close the file

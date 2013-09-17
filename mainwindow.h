@@ -6,6 +6,8 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QDialog>
+#include <QErrorMessage>
+#include <QInputDialog>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QComboBox>
@@ -22,15 +24,22 @@
 
 #include <iostream>
 #include <string>
+#include <string.h>
 #include <sstream>
+#include <map>
+#include <vector>
+#include <math.h>
 
 #include "Campo.h"
 #include "Header.h"
 #include "TDARecordFile.h"
+#include "Index.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    QErrorMessage* errorM;
 
     //Menu Archivo
     QMenu* mArchivo;
@@ -50,12 +59,23 @@ class MainWindow : public QMainWindow
     //Menu Registro
     QMenu* mRegistro;
     QAction* actionIntroducirRegistro;
+    QAction* actionBuscarRegistro;
+    QAction* actionBorrarRegistro;
+    QAction* actionListarRegistro;
 
     //Menu Indices
     QMenu* mIndices;
+    QAction* actionCrearIndiceSimple;
+    QAction* actionCrearArbolB;
+    QAction* actionReindexar;
 
     //Menu Utilidades
     QMenu* mUtilidades;
+    QAction* actionImportarXML;
+    QAction* actionExportarXML;
+    QAction* actionImportarJSON;
+    QAction* actionExportarJSON;
+
 
     //Dialogo crear Campo
     QDialog* dialogcrearCampo;
@@ -80,6 +100,7 @@ class MainWindow : public QMainWindow
     QTableWidgetItem* itemTableRegistro;
     QPushButton* aceptarIntroducirRegistro;
     QPushButton* cancelarIntroducirRegistro;
+    QTableWidget* tablaRegistro;
 
 
     
@@ -95,6 +116,7 @@ public slots:
     void guardarArchivo();
     void imprimirArchivo();
     void cerrarArchivo();
+    void salir();
 
     //Slots Menu Campos
     void crearCampo();
@@ -103,21 +125,31 @@ public slots:
 
     //Slots Menu Registro
     void introducirRegistro();
+    void buscarRegistro();
+    void borrarRegistro();
+    void listarRegistro();
 
     //Slots Menu Indices
+    void crearIndiceSimple();
+    void crearArbolB();
+    void reindexar();
 
     //Slots Menu Utilidades
+    void importarXML();
+    void exportarXML();
+    void importarJSON();
+    void exportarJSON();
 
     //Slots QDialog Crear Campo
     void cambiarTipoCampo();
-    bool click_aceptarCrearCampo();
+    void click_aceptarCrearCampo();
     void click_cancelarCampo();
 
     //Slots QDialog Listar Campo
     void click_aceptarListarCampo();
 
     //SlotsQDialgo Introducir Campo
-    bool click_aceptarIntroducirRegistro();
+    void click_aceptarIntroducirRegistro();
     void click_cancelarIntroducirRegistro();
 
 
@@ -126,13 +158,12 @@ private:
     void agregar();
     void activardesactivarMenus(bool);
     void crearDialogoIntroducirRegistro();
-    void agregartmp(string);
-    Header* header;
+
     TDARecordFile* archivo;
-    vector<Campo*> listaC;
-    vector <char*> listaR;
-    string unregistro;
-    bool guardado;
+    Header* header;
+    Index* indices;
+    vector<Campo*> campos;
+    vector<string> registro;
     bool regIntroducido;
 
 };
