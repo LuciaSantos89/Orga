@@ -92,7 +92,7 @@ void MainWindow::crearActions(){
 void MainWindow::agregar(){
 
     //Ventana Principal
-    this->setMinimumSize(370, 200);
+    this->setMinimumSize(700, 300);
     this->setWindowTitle("Proyecto - Lusilla");
 
     //Menu Archivo
@@ -199,7 +199,6 @@ void MainWindow::agregar(){
     tableCampo->move(50,50);
     tableCampo->setColumnWidth(0,130);
 
-
 }
 
 //funciones Menu Archivo
@@ -208,7 +207,9 @@ void MainWindow::nuevoArchivo(){
     archivo=new TDARecordFile();
     header=new Header();
     indices= new Index();
+    registros.clear();
     campos.clear();
+    registro.clear();
     regIntroducido=false;
 }
 
@@ -219,6 +220,8 @@ void MainWindow::abrirArchivo(){
         archivo=new TDARecordFile();
         header=new Header();
         campos.clear();
+        registros.clear();
+        registro.clear();
         fn = nombreArchivo.toStdString();
         archivo->open(fn,ios_base::out | ios_base::in);
         header->recuperarHeader(archivo);
@@ -480,15 +483,36 @@ void MainWindow::borrarRegistro(){
 }
 
 void MainWindow::listarRegistro(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    tableRegistro=new QTableWidget(this);
+    tableRegistro->move(50,50);
+    tableRegistro->setMinimumSize(600,220);
+    QStringList titulo;
+    for(unsigned int i=0; i<campos.size();i++){
+        titulo<<campos.at(i)->getNombre().c_str();
+    }
+    tableRegistro->setColumnCount(campos.size());
+    tableRegistro->setHorizontalHeaderLabels(titulo);
+    tableRegistro->resizeColumnsToContents();
+    registros=archivo->listRecord(campos,indices);
+    tableRegistro->setRowCount(registros.size());
+    Registro* r;
+    for(unsigned int i=0;i<registros.size();i++){
+        r=registros.at(i);
+        registro=r->getRegistro();
+        for(unsigned int j=0;j<registro.size();j++){
+            itemTableRegistro= new QTableWidgetItem(0);
+            itemTableRegistro->setText(registro.at(j).c_str());
+            tableRegistro->setItem(i,j,itemTableRegistro);
+        }
+    }
+    tableRegistro->show();
 }
 
 //Funciones Menu Indices
 void MainWindow::crearIndiceSimple(){
     if(!archivo->isOpen() || !regIntroducido){
         errorM=new QErrorMessage(this);
-        errorM->showMessage("Primero tiene que guardar el archivo en Ingresar Registros");
+        errorM->showMessage("Primero tiene que guardar el archivo e Ingresar Registros");
     }
     else{
         archivo->guardarIndices(indices,fn);

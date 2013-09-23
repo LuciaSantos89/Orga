@@ -97,6 +97,12 @@ class MainWindow : public QMainWindow
     //Dialogo Buscar Registro
     QDialog* dialogBuscarRegistro;
     QPushButton* aceptarBuscarRegistro;
+
+    //Mostrar Registros
+    QTableWidget* tableRegistro;
+    QTableWidgetItem* itemTableRegistro;
+    QPushButton* aceptarlistarRegistro;
+
     
 public:
     MainWindow(QWidget *parent = 0);
@@ -157,6 +163,7 @@ private:
     Index* indices;
     vector<Campo*> campos;
     vector<string> registro;
+    vector<Registro*> registros;
     bool regIntroducido;
     string fn;
 

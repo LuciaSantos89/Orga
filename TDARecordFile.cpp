@@ -47,17 +47,19 @@ Registro* TDARecordFile::searchRecord(string llave,vector<Campo*> campos, Index*
         for (unsigned int i = 0; i < campos.size(); i++) {
             tam+=campos.at(i)->getLongitud();
         }
-        char tmp[tam];
+        char tmp[tam-1];
         this->read(tmp,tam);
         cadenaRegistro=(string) tmp;
         vector<string> registro;
-        unsigned int tamCampo=0;
+        unsigned int tamCampo1=0;
+        unsigned int tamCampo2=0;
         string tmp2="";
         string contCampo="";
         for (unsigned int i = 0; i < campos.size(); i++) {
-            tmp2=cadenaRegistro.substr(tamCampo,campos.at(i)->getLongitud());
-            tamCampo=campos.at(i)->getLongitud();
-            for (unsigned int i = 0; i < tamCampo; i++){
+            tmp2=cadenaRegistro.substr(tamCampo1,campos.at(i)->getLongitud());
+            tamCampo1+=campos.at(i)->getLongitud();
+            tamCampo2=campos.at(i)->getLongitud();
+            for (unsigned int i = 0; i < tamCampo2; i++){
                 if(tmp2.at(i)!=' ')
                     contCampo+=tmp2.at(i);
             }
@@ -82,6 +84,17 @@ bool TDARecordFile::deleteRecord(string llave,Index* in){
         return true;
     }
     return false;
+}
+
+vector<Registro*> TDARecordFile::listRecord(vector <Campo*>campos,Index* in){
+    string llave="";
+    indices=in->getIndices();
+    for(map<string,int>::iterator it=indices.begin(); it!=indices.end(); it++){
+        llave=it->first;
+        Registro* r = this->searchRecord(llave,campos,in);
+        registros.push_back(r);
+    }
+    return registros;
 }
 
 void TDARecordFile::guardarIndices(Index* in,string fn){
