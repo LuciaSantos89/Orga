@@ -53,7 +53,6 @@ class MainWindow : public QMainWindow
     //Menu Campos
     QMenu* mCampo;
     QAction* actionCrearCampo;
-    QAction* actionModificarCampo;
     QAction* actionListarCampo;
 
     //Menu Registro
@@ -120,7 +119,6 @@ public slots:
 
     //Slots Menu Campos
     void crearCampo();
-    void modificarCampo();
     void listarCampo();
 
     //Slots Menu Registro

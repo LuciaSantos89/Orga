@@ -152,3 +152,56 @@ void TDARecordFile::getAvaillist(int longitudTotal){
         pos+=longitudTotal;
     }
 }
+
+void TDARecordFile::guardarXML(vector<Campo*> campos, Index* in, string fn){
+    string filename=fn.substr(0,fn.size()-5);
+    filename+=".xml";
+    TDAFile* xmlArchivo=new TDAFile();
+    xmlArchivo->open(filename,ios_base::out);
+    const char* texto;
+    texto="<xml>\n";
+    xmlArchivo->write(texto,6);
+    xmlArchivo->flush();
+    stringstream tmp;
+    texto="<campos>\n";
+    xmlArchivo->write(texto,9);
+    xmlArchivo->flush();
+    for(unsigned int i = 0; i<campos.size(); i++){
+        tmp<<"<campo nombre=\""<<campos.at(i)->getNombre()
+          <<"\" tipo=\""<<campos.at(i)->getTipo()
+          <<"\" longitud=\""<<campos.at(i)->getLongitud()
+          <<"\" decimal=\""<<campos.at(i)->getDecimal()
+         <<"\" llave=\""<<campos.at(i)->getLlave()<<"\" /campo>"<<endl;
+    }
+    xmlArchivo->write(tmp.str().c_str(),tmp.str().size());
+    xmlArchivo->flush();
+    texto="</campos>\n";
+    xmlArchivo->write(texto,10);
+    xmlArchivo->flush();
+
+    vector<Registro*> regs=this->listRecord(campos,in);
+    vector <string> registro;
+    Registro* r;
+    texto="<registros>\n";
+    xmlArchivo->write(texto,12);
+    xmlArchivo->flush();
+    for(unsigned int i=0;i<regs.size();i++){
+        stringstream tmp2;
+        r=regs.at(i);
+        registro=r->getRegistro();
+        tmp2<<"<registro ";
+        for(unsigned int j=0;j<registro.size();j++){
+            tmp2<<campos.at(j)->getNombre()<<"=\""<<registro.at(j)<<"\" ";
+        }
+        tmp2<<"/registro>"<<endl;
+        xmlArchivo->write(tmp2.str().c_str(),tmp2.str().size());
+        xmlArchivo->flush();
+    }
+    texto="</registros>\n";
+    xmlArchivo->write(texto,13);
+    xmlArchivo->flush();
+    texto="</xml>\n";
+    xmlArchivo->write(texto,7);
+    xmlArchivo->flush();
+    xmlArchivo->close();
+}

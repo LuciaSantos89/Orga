@@ -34,6 +34,7 @@ public:
     vector<Registro*> listRecord(vector <Campo*>,Index*);
     void guardarIndices(Index*,string);
     map<string,int> abrirIndices(string);
+    void guardarXML(vector <Campo*>, Index*,string);
 
     //Indices Arbol B
 

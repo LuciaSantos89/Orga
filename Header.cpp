@@ -26,7 +26,6 @@ void Header::crearHeader(vector<Campo*> campos){
     }
     tmp<<"#";
     this->header=tmp.str();
-    cout<<this->header<<endl;
 }
 
 

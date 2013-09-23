@@ -43,10 +43,6 @@ void MainWindow::crearActions(){
     actionCrearCampo->setShortcut(tr("Ctrl+C"));
     connect(actionCrearCampo,SIGNAL(triggered()),this,SLOT(crearCampo()));
 
-    actionModificarCampo= new QAction("&Modificar Campo",this);
-    actionModificarCampo->setShortcut(tr("Ctrl+M"));
-    connect(actionModificarCampo,SIGNAL(triggered()),this,SLOT(modificarCampo()));
-
     actionListarCampo= new QAction("&Listar Campos",this);
     actionListarCampo->setShortcut(tr("Ctrl+L"));
     connect(actionListarCampo,SIGNAL(triggered()),this,SLOT(listarCampo()));
@@ -107,7 +103,6 @@ void MainWindow::agregar(){
     //Menu Campo
     mCampo=menuBar()->addMenu("&Campo");
     mCampo->addAction(actionCrearCampo);
-    mCampo->addAction(actionModificarCampo);
     mCampo->addAction(actionListarCampo);
 
     //Menu Registro
@@ -276,17 +271,6 @@ void MainWindow::crearCampo(){
     dialogcrearCampo->show();
 }
 
-void MainWindow::modificarCampo(){
-    if(regIntroducido || campos.size()==0){
-        errorM=new QErrorMessage(this);
-        errorM->showMessage("No puede modificar los campos");
-    }
-    else{
-        errorM=new QErrorMessage(this);
-        errorM->showMessage("Oh-no! Lucia no hizo esta parte");
-    }
-}
-
 void MainWindow::listarCampo(){
     if(campos.size()==0)
         return;
@@ -429,7 +413,7 @@ void MainWindow::introducirRegistro(){
 
 void MainWindow::crearDialogoIntroducirRegistro(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::buscarRegistro(){
@@ -521,32 +505,32 @@ void MainWindow::crearIndiceSimple(){
 
 void MainWindow::crearArbolB(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::reindexar(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::importarXML(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::exportarXML(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    archivo->guardarXML(campos,indices,fn);
+
 }
 
 void MainWindow::importarJSON(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 void MainWindow::exportarJSON(){
     errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    errorM->showMessage("Oh-no! Lucia no hizo esta parte");
 }
 
 
@@ -558,7 +542,6 @@ void MainWindow::activardesactivarMenus(bool opcion){
     actionCerrarArchivo->setEnabled(opcion);
     actionImprimirArchivo->setEnabled(opcion);
     actionCrearCampo->setEnabled(opcion);
-    actionModificarCampo->setEnabled(opcion);
     actionListarCampo->setEnabled(opcion);
     actionIntroducirRegistro->setEnabled(opcion);
     actionBuscarRegistro->setEnabled(opcion);
