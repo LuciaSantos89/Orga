@@ -3,18 +3,21 @@
 
 #include <string>
 #include <map>
-
+#include <iostream>
 using namespace::std;
 
 class Index
 {
 public:
     Index();
+    Index(map<string,int>);
     ~Index();
-    bool agregarIndice(string,int);
+    void agregarIndice(string,int);
+    void eliminarIndice(string);
     int getOffset(string);
     void cambiarIndice(string,string);
     bool verificarIndice(string);
+    map <string,int> getIndices();
 
 private:
     string pkey;

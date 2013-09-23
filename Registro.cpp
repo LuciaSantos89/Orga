@@ -33,3 +33,7 @@ string Registro::campoLLave(){
 vector<Campo*> Registro::getCampos(){
     return campos;
 }
+
+vector<string> Registro::getRegistro(){
+    return registro;
+}

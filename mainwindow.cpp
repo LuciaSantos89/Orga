@@ -199,21 +199,6 @@ void MainWindow::agregar(){
     tableCampo->move(50,50);
     tableCampo->setColumnWidth(0,130);
 
-    //Dialogo Introducir Registro
-    dialogIntroducirRegistro=new QDialog(this,Qt::Dialog);
-    dialogIntroducirRegistro->hide();
-    dialogIntroducirRegistro->setMinimumSize(500,500);
-    dialogIntroducirRegistro->setWindowTitle("Introducir Registro");
-    dialogIntroducirRegistro->setModal(true);
-    dialogIntroducirRegistro->setWindowModality(Qt::WindowModal);
-
-    aceptarIntroducirRegistro=new QPushButton("Aceptar",dialogIntroducirRegistro);
-    aceptarIntroducirRegistro->move(50,400);
-    connect(aceptarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_aceptarIntroducirRegistro()));
-
-    cancelarIntroducirRegistro=new QPushButton("Cancelar",dialogIntroducirRegistro);
-    cancelarIntroducirRegistro->move(300,400);
-    connect(cancelarIntroducirRegistro,SIGNAL(clicked()),this,SLOT(click_cancelarIntroducirRegistro()));
 
 }
 
@@ -233,13 +218,17 @@ void MainWindow::abrirArchivo(){
         activardesactivarMenus(true);
         archivo=new TDARecordFile();
         header=new Header();
-        indices= new Index();
         campos.clear();
-        string fn = nombreArchivo.toStdString();
+        fn = nombreArchivo.toStdString();
         archivo->open(fn,ios_base::out | ios_base::in);
         header->recuperarHeader(archivo);
         campos=header->getCampos();
-        //indices->abrir(fn);
+        indices= new Index(archivo->abrirIndices(fn));
+        int longitudTotal=0;
+        for(unsigned int i=0; i<campos.size();i++){
+            longitudTotal+=campos.at(i)->getLongitud();
+        }
+        archivo->getAvaillist(longitudTotal);
     }
 }
 
@@ -247,7 +236,7 @@ void MainWindow::guardarArchivo(){
     if(!regIntroducido){
         QString nombreArchivo = QFileDialog::getSaveFileName(this,tr("Guardar Documento"),QDir::currentPath(),"Lusilla (*.lsll)");
         if(!nombreArchivo.isNull()){
-            string fn = nombreArchivo.toStdString()+".lsll";
+            fn = nombreArchivo.toStdString()+".lsll";
             archivo->open(fn,ios_base::out);
             header->crearHeader(campos);
             header->guardarHeader(archivo);
@@ -262,7 +251,7 @@ void MainWindow::imprimirArchivo(){
 
 void MainWindow::cerrarArchivo(){
     if(archivo->isOpen()){
-        //indices->guardar();
+        archivo->guardarIndices(indices,fn);
         archivo->flush();
         archivo->close();
     }
@@ -277,7 +266,7 @@ void MainWindow::salir(){
 //Funcines Menu Campo
 void MainWindow::crearCampo(){
     if(regIntroducido){
-        errorM=new QErrorMessage(this);
+        errorM=new QErrorMessage(dialogcrearCampo);
         errorM->showMessage("Ya no puede crear campos");
         return;
     }
@@ -425,24 +414,14 @@ void MainWindow::introducirRegistro(){
         }
         Registro* r= new Registro();
         r->crearRegistro(registro,campos);
-        //if(!indices->verificarIndice()){
-            archivo->addRecord(r,indices);
-        /*}
-        else{
+        if(!archivo->addRecord(r,indices)){
             errorM=new QErrorMessage(this);
             errorM->showMessage("El registro con esa llave ya existe");
-        }*/
+        }
+        else{
+            regIntroducido=true;
+        }
     }
-}
-
-void MainWindow::click_aceptarIntroducirRegistro(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
-}
-
-void MainWindow::click_cancelarIntroducirRegistro(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
 }
 
 void MainWindow::crearDialogoIntroducirRegistro(){
@@ -451,13 +430,53 @@ void MainWindow::crearDialogoIntroducirRegistro(){
 }
 
 void MainWindow::buscarRegistro(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    QString cadena=QInputDialog::getText(this,"Llave","Llave",QLineEdit::Normal,"");
+    Registro* r=archivo->searchRecord(cadena.toStdString(),campos,indices);
+    if(r==NULL){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("No existe ese registro");
+    }
+    else{
+        registro=r->getRegistro();
+
+        //Dialogo Buscar Registo
+        dialogBuscarRegistro=new QDialog(this);
+        dialogBuscarRegistro->hide();
+        dialogBuscarRegistro->setWindowModality(Qt::WindowModal);
+        dialogBuscarRegistro->setWindowTitle("Registro");
+        dialogBuscarRegistro->setMinimumWidth(300);
+
+        aceptarBuscarRegistro= new QPushButton("Aceptar",dialogBuscarRegistro);
+        connect(aceptarBuscarRegistro,SIGNAL(clicked()),this, SLOT(click_aceptaBuscarRegistro()));
+
+        QLabel* l;
+        QLineEdit* le;
+        int x1=40,x2=100,y=50;
+        for(unsigned int i=0; i<campos.size(); i++){
+            l=new QLabel(QString(campos.at(i)->getNombre().c_str()),dialogBuscarRegistro);
+            l->move(x1,y);
+            le=new QLineEdit(QString(registro.at(i).c_str()),dialogBuscarRegistro);
+            le->setReadOnly(true);
+            le->move(x2,y);
+            y+=50;
+        }
+        dialogBuscarRegistro->setMinimumHeight(y+100);
+        aceptarBuscarRegistro->move(100,y);
+        dialogBuscarRegistro->show();
+    }
+
 }
 
+ void MainWindow::click_aceptaBuscarRegistro(){
+     dialogBuscarRegistro->close();
+ }
+
 void MainWindow::borrarRegistro(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    QString cadena=QInputDialog::getText(this,"Llave","Llave",QLineEdit::Normal,"");
+    if(!archivo->deleteRecord(cadena.toStdString(),indices)){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("El registro no existe");
+    }
 }
 
 void MainWindow::listarRegistro(){
@@ -467,8 +486,13 @@ void MainWindow::listarRegistro(){
 
 //Funciones Menu Indices
 void MainWindow::crearIndiceSimple(){
-    errorM=new QErrorMessage(this);
-    errorM->showMessage("Oh-no! Lucia no ha hecho esta parte");
+    if(!archivo->isOpen() || !regIntroducido){
+        errorM=new QErrorMessage(this);
+        errorM->showMessage("Primero tiene que guardar el archivo en Ingresar Registros");
+    }
+    else{
+        archivo->guardarIndices(indices,fn);
+    }
 }
 
 void MainWindow::crearArbolB(){

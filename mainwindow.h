@@ -94,15 +94,9 @@ class MainWindow : public QMainWindow
     QTableWidgetItem* itemTableCampo;
     QPushButton* aceptarlistarCampo;
 
-    //Dialogo introducirRegistro
-    QDialog* dialogIntroducirRegistro;
-    QTableWidget* tableRegistro;
-    QTableWidgetItem* itemTableRegistro;
-    QPushButton* aceptarIntroducirRegistro;
-    QPushButton* cancelarIntroducirRegistro;
-    QTableWidget* tablaRegistro;
-
-
+    //Dialogo Buscar Registro
+    QDialog* dialogBuscarRegistro;
+    QPushButton* aceptarBuscarRegistro;
     
 public:
     MainWindow(QWidget *parent = 0);
@@ -148,9 +142,8 @@ public slots:
     //Slots QDialog Listar Campo
     void click_aceptarListarCampo();
 
-    //SlotsQDialgo Introducir Campo
-    void click_aceptarIntroducirRegistro();
-    void click_cancelarIntroducirRegistro();
+    //Slots QDialog Buscar Registro
+    void click_aceptaBuscarRegistro();
 
 
 private:
@@ -165,6 +158,7 @@ private:
     vector<Campo*> campos;
     vector<string> registro;
     bool regIntroducido;
+    string fn;
 
 };
 #endif // MAINWINDOW_H
